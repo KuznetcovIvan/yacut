@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from . import db
-
+from .constants import MAX_LENGTH
 
 class URLMap(db.Model):
     id = db.Column(
@@ -11,7 +11,7 @@ class URLMap(db.Model):
         db.Text, nullable=False
     )
     short = db.Column(
-        db.String(16), index=True, unique=True, nullable=False
+        db.String(MAX_LENGTH), index=True, unique=True, nullable=False
     )
     timestamp = db.Column(
         db.DateTime, default=datetime.utcnow
