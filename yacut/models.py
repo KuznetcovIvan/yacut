@@ -3,6 +3,7 @@ from datetime import datetime
 from . import db
 from .constants import MAX_LENGTH
 
+
 class URLMap(db.Model):
     id = db.Column(
         db.Integer, primary_key=True

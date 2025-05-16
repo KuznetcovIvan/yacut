@@ -1,9 +1,9 @@
 import logging
 from logging.config import fileConfig
 
+from alembic import context
 from flask import current_app
 
-from alembic import context
 from yacut import db
 from yacut.models import URLMap
 
