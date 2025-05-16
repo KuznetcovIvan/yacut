@@ -1,7 +1,7 @@
 from flask import redirect, render_template
 
 from . import app, db
-from .constants import ALLOWED_CHARS, SHORT_LEN
+from .constants import ALLOWED_CHARS, SHORT_LENGTH
 from .forms import URLMapForm
 from .models import URLMap
 from .utils import get_unique_short_id
@@ -13,15 +13,13 @@ def index_view():
     if not form.validate_on_submit():
         return render_template('index.html', form=form)
     short = form.custom_id.data or None
-    if short:
-        if URLMap.query.filter_by(short=short).first():
-            form.custom_id.errors.append(
-                'Предложенный вариант короткой ссылки уже существует.'
-            )
-            return render_template('index.html', form=form)
-    else:
-        short = get_unique_short_id(ALLOWED_CHARS, SHORT_LEN)
-    url_map = URLMap(original=form.original_link.data, short=short)
+    if short and URLMap.query.filter_by(short=short).first():
+        form.custom_id.errors.append(f'Cсылка «{short}» уже занята!')
+        return render_template('index.html', form=form)
+    url_map = URLMap(
+        original=form.original_link.data,
+        short=short or get_unique_short_id(ALLOWED_CHARS, SHORT_LENGTH)
+    )
     db.session.add(url_map)
     db.session.commit()
     return render_template(
