@@ -14,7 +14,9 @@ def index_view():
         return render_template('index.html', form=form)
     short = form.custom_id.data or None
     if short and URLMap.query.filter_by(short=short).first():
-        form.custom_id.errors.append(f'Cсылка «{short}» уже занята!')
+        form.custom_id.errors.append(
+            'Предложенный вариант короткой ссылки уже существует.'
+        )
         return render_template('index.html', form=form)
     url_map = URLMap(
         original=form.original_link.data,

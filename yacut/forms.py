@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import URL, DataRequired, Length, Optional, Regexp
 
-from .constants import ALLOWED_CHARS, MAX_LENGTH
+from .constants import MAX_LENGTH, PATTERN
 
 
 class URLMapForm(FlaskForm):
@@ -18,12 +18,7 @@ class URLMapForm(FlaskForm):
         validators=(
             Length(1, MAX_LENGTH),
             Optional(),
-            Regexp(
-                f'^[{ALLOWED_CHARS}]+$',
-                message='Только латинские буквы и цифры!'
-            )
+            Regexp(PATTERN, message='Только латинские буквы и цифры!')
         )
     )
-    submit = SubmitField(
-        'Создать'
-    )
+    submit = SubmitField('Создать')
