@@ -16,6 +16,10 @@ from .constants import (
 )
 from .error_handlers import ShortError
 
+SHORT_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'
+INVALID_SHORT = 'Указано недопустимое имя для короткой ссылки'
+GENERATION_FAILED = 'Не удалось сгенерировать имя для короткой ссылки'
+
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,22 +41,16 @@ class URLMap(db.Model):
     def create(original, short):
         if short:
             if URLMap.query.filter_by(short=short).first():
-                raise ShortError(
-                    'Предложенный вариант короткой ссылки уже существует.'
-                )
+                raise ShortError(SHORT_EXISTS)
             if not fullmatch(PATTERN, short) or len(short) > MAX_SHORT_LENGTH:
-                raise ShortError(
-                    'Указано недопустимое имя для короткой ссылки'
-                )
+                raise ShortError(INVALID_SHORT)
         else:
             for _ in range(MAX_ATTEMPTS):
                 short = ''.join(choices(ALLOWED_CHARS, k=SHORT_LENGTH))
                 if not URLMap.get(short):
                     break
             else:
-                raise ShortError(
-                    'Не удалось сгенерировать имя для короткой ссылки'
-                )
+                raise ShortError(GENERATION_FAILED)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
