@@ -1,7 +1,7 @@
-from flask import redirect, render_template
+from flask import redirect, render_template, url_for
 
 from . import app, db
-from .constants import ALLOWED_CHARS, SHORT_LENGTH
+from .constants import ALLOWED_CHARS, SHORT_LENGTH, REDIRECT_VIEW
 from .forms import URLMapForm
 from .models import URLMap
 from .utils import get_unique_short_id
@@ -25,12 +25,14 @@ def index_view():
     db.session.add(url_map)
     db.session.commit()
     return render_template(
-        'index.html', form=form, url_map=url_map
+        'index.html',
+        form=form,
+        short_url=url_for(REDIRECT_VIEW, short=url_map.short, _external=True)
     )
 
 
-@app.route('/<short_id>', methods=('GET', ))
-def redirect_view(short_id):
+@app.route('/<short>', methods=('GET', ))
+def redirect_view(short):
     return redirect(
-        URLMap.query.filter_by(short=short_id).first_or_404().original
+        URLMap.query.filter_by(short=short).first_or_404().original
     )
