@@ -5,11 +5,6 @@ from flask import jsonify, render_template
 from . import app, db
 
 
-class ShortError(Exception):
-    """Исключение для ошибок, связанных с созданием
-    или валидацией короткого идентификатора"""
-
-
 class InvalidAPIUsage(Exception):
     status_code = HTTPStatus.BAD_REQUEST
 

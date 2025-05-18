@@ -26,6 +26,11 @@
                       {{ error }}
                     {% endfor %}
                   </p>
+                  <p class="text-danger">
+                    {% for message in get_flashed_messages() %}
+                      {{ message }}
+                    {% endfor %}
+                  </p>
                 </div>
                 {{ form.submit(class='btn btn-primary') }}
               </div>

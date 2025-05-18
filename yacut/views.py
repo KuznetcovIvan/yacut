@@ -1,11 +1,10 @@
 from http import HTTPStatus
 
-from flask import abort, redirect, render_template
+from flask import abort, flash, redirect, render_template
 
 from . import app
-from .error_handlers import ShortError
 from .forms import URLMapForm
-from .models import URLMap
+from .models import URLMap, URLMapCreationError
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -14,17 +13,18 @@ def index_view():
     if not form.validate_on_submit():
         return render_template('index.html', form=form)
     try:
-        url_map = URLMap.create(
-            form.original_link.data, form.custom_id.data or None
+        return render_template(
+            'index.html',
+            form=form,
+            short_link=URLMap.create(
+                form.original_link.data,
+                form.custom_id.data or None,
+                validation=False
+            ).get_short_link()
         )
-    except ShortError as error:
-        form.custom_id.errors.append(str(error))
+    except URLMapCreationError as error:
+        flash(str(error))
         return render_template('index.html', form=form)
-    return render_template(
-        'index.html',
-        form=form,
-        short_link=URLMap.get_short_link(url_map.short)
-    )
 
 
 @app.route('/<short>', methods=('GET', ))
