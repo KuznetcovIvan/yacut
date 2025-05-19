@@ -4,7 +4,7 @@ from flask import abort, flash, redirect, render_template
 
 from . import app
 from .forms import URLMapForm
-from .models import URLMap, URLMapCreationError
+from .models import URLMap
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -22,7 +22,7 @@ def index_view():
                 validation=False
             ).get_short_link()
         )
-    except URLMapCreationError as error:
+    except URLMap.CreationError as error:
         flash(str(error))
         return render_template('index.html', form=form)
 

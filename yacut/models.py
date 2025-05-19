@@ -22,11 +22,6 @@ GENERATION_FAILED = 'Не удалось сгенерировать имя дл�
 URL_TOO_LONG = 'Превышен максимальный размер URL'
 
 
-class URLMapCreationError(Exception):
-    """Исключение для ошибок, связанных с созданием
-    или валидацией экземпляра URLMap"""
-
-
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(MAX_URL_LENGTH), nullable=False)
@@ -34,6 +29,10 @@ class URLMap(db.Model):
         db.String(MAX_SHORT_LENGTH), index=True, unique=True, nullable=False
     )
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    class CreationError(Exception):
+        """Исключение для ошибок, связанных с созданием
+        или валидацией экземпляра URLMap"""
 
     def get_short_link(self):
         return url_for(REDIRECT_VIEW, short=self.short, _external=True)
@@ -45,23 +44,23 @@ class URLMap(db.Model):
     @staticmethod
     def create(original, short, validation=True):
         if short:
-            if URLMap.get(short):
-                raise URLMapCreationError(SHORT_EXISTS)
             if (
                 validation
                 and (len(short) > MAX_SHORT_LENGTH
                      or not fullmatch(PATTERN, short))
             ):
-                raise URLMapCreationError(INVALID_SHORT)
+                raise URLMap.CreationError(INVALID_SHORT)
+            if URLMap.get(short):
+                raise URLMap.CreationError(SHORT_EXISTS)
         else:
             for _ in range(MAX_ATTEMPTS):
                 short = ''.join(choices(ALLOWED_CHARS, k=SHORT_LENGTH))
                 if not URLMap.get(short):
                     break
             else:
-                raise URLMapCreationError(GENERATION_FAILED)
+                raise URLMap.CreationError(GENERATION_FAILED)
         if validation and (len(original) > MAX_URL_LENGTH):
-            raise URLMapCreationError(URL_TOO_LONG)
+            raise URLMap.CreationError(URL_TOO_LONG)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()

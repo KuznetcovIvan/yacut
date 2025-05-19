@@ -4,7 +4,7 @@ from flask import jsonify, request
 
 from . import app
 from .error_handlers import InvalidAPIUsage
-from .models import URLMap, URLMapCreationError
+from .models import URLMap
 
 NO_REQUEST_BODY = 'Отсутствует тело запроса'
 URL_REQUIRED = '"url" является обязательным полем!'
@@ -21,7 +21,7 @@ def create_url_map():
         raise InvalidAPIUsage(URL_REQUIRED)
     try:
         url_map = URLMap.create(original, data.get('custom_id'))
-    except URLMapCreationError as error:
+    except URLMap.CreationError as error:
         raise InvalidAPIUsage(str(error))
     return jsonify({
         'url': url_map.original,
